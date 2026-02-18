@@ -222,7 +222,7 @@ export function ContactSection() {
                   animate={{ opacity: 1, y: 0 }}
                   className="text-green-400 text-xs text-center font-mono"
                 >
-                  Thanks for reaching out! I'll get back to you soon.
+                  Thanks for reaching out! I&apos;ll get back to you soon.
                 </motion.p>
               )}
             </form>
