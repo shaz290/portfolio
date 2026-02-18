@@ -137,7 +137,7 @@ export function ContactSection() {
               <div>
                 <p className="text-white font-semibold text-sm">Currently Available</p>
                 <p className="text-slate-400 text-xs mt-1">
-                  Open to full-time roles, contract work, and consulting opportunities in backend engineering.
+                  Open to full-time roles and consulting opportunities in backend engineering.
                 </p>
               </div>
             </motion.div>
