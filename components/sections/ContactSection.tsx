@@ -3,15 +3,12 @@
 import { useState, useRef, FormEvent } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { motion } from 'framer-motion'
-import emailjs from '@emailjs/browser'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { RESUME_DATA } from '@/lib/utils'
 import { fadeInLeft, fadeInRight } from '@/lib/animations'
 
-// Replace these with your actual EmailJS credentials
-const EMAILJS_SERVICE_ID = 'service_s5x4r0a'
-const EMAILJS_TEMPLATE_ID = 'template_f1g6l8n'
-const EMAILJS_PUBLIC_KEY = 'UMtdnLlW1AYMuvXEp'
+// ✅ Replace with your Formspree endpoint
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xwvnqlaz'
 
 const CONTACT_LINKS = [
   {
@@ -55,17 +52,21 @@ export function ContactSection() {
     e.preventDefault()
     if (!formRef.current) return
     setStatus('sending')
+
     try {
-      await emailjs.sendForm(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        formRef.current,
-        EMAILJS_PUBLIC_KEY
-      )
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(formRef.current),
+      })
+
+      if (!res.ok) throw new Error('Form submit failed')
+
       setStatus('success')
       setFields({ name: '', email: '', subject: '', message: '' })
       setTimeout(() => setStatus('idle'), 4000)
-    } catch {
+    } catch (err) {
+      console.error('Formspree error:', err)
       setStatus('error')
       setTimeout(() => setStatus('idle'), 4000)
     }
@@ -75,7 +76,9 @@ export function ContactSection() {
     <section id="contact" className="section-padding relative">
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at center bottom, rgba(0,212,255,0.04) 0%, transparent 70%)' }}
+        style={{
+          background: 'radial-gradient(ellipse at center bottom, rgba(0,212,255,0.04) 0%, transparent 70%)',
+        }}
       />
 
       <div className="max-w-6xl mx-auto relative" ref={ref}>
@@ -118,10 +121,16 @@ export function ContactSection() {
               </div>
             </div>
 
-            {/* Availability card */}
+            {/* Availability */}
             <motion.div
               className="glass border border-green-400/20 rounded-2xl p-5 flex items-start gap-4"
-              animate={{ boxShadow: ['0 0 10px rgba(74,222,128,0.1)', '0 0 25px rgba(74,222,128,0.2)', '0 0 10px rgba(74,222,128,0.1)'] }}
+              animate={{
+                boxShadow: [
+                  '0 0 10px rgba(74,222,128,0.1)',
+                  '0 0 25px rgba(74,222,128,0.2)',
+                  '0 0 10px rgba(74,222,128,0.1)',
+                ],
+              }}
               transition={{ duration: 2.5, repeat: Infinity }}
             >
               <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse mt-1 shrink-0" />
@@ -135,17 +144,16 @@ export function ContactSection() {
           </motion.div>
 
           {/* Right: Form */}
-          <motion.div
-            variants={fadeInRight}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-          >
+          <motion.div variants={fadeInRight} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
             <form
               ref={formRef}
               onSubmit={handleSubmit}
               className="glass border border-dark-border rounded-3xl p-6 md:p-8 space-y-4"
             >
               <h3 className="font-display text-lg font-bold text-white mb-6">Send a Message</h3>
+
+              {/* Optional subject override for emails */}
+              <input type="hidden" name="_subject" value="New Portfolio Contact" />
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <InputField
@@ -198,22 +206,13 @@ export function ContactSection() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-neon-blue to-neon-purple text-dark-base transition-all duration-200 hover:shadow-neon-strong disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {status === 'sending' ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <motion.span
-                      className="w-4 h-4 border-2 border-dark-base/40 border-t-dark-base rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                    />
-                    Sending...
-                  </span>
-                ) : status === 'success' ? (
-                  '✓ Message Sent!'
-                ) : status === 'error' ? (
-                  '✗ Failed — Try Again'
-                ) : (
-                  'Send Message →'
-                )}
+                {status === 'sending'
+                  ? 'Sending...'
+                  : status === 'success'
+                    ? '✓ Message Sent!'
+                    : status === 'error'
+                      ? '✗ Failed — Try Again'
+                      : 'Send Message →'}
               </motion.button>
 
               {status === 'success' && (
