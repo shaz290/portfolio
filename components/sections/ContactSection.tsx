@@ -122,7 +122,7 @@ export function ContactSection() {
             </div>
 
             {/* Availability */}
-            <motion.div
+            {/* <motion.div
               className="glass border border-green-400/20 rounded-2xl p-5 flex items-start gap-4"
               animate={{
                 boxShadow: [
@@ -140,7 +140,7 @@ export function ContactSection() {
                   Open to full-time roles and consulting opportunities in backend engineering.
                 </p>
               </div>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
 
           {/* Right: Form */}
